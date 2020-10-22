@@ -207,11 +207,7 @@ impl KvStore {
 /// Create a new log file with given generation number and add the reader to the readers map.
 ///
 /// Returns the writer to the log.
-fn new_log_file(
-    path: &Path,
-    gen: u64,
-    readers: &mut HashMap<u64, BufReaderWithPos<File>>,
-) -> Result<BufWriterWithPos<File>> {
+fn new_log_file(path: &Path, gen: u64, readers: &mut HashMap<u64, BufReaderWithPos<File>>, ) -> Result<BufWriterWithPos<File>> {
     let path = log_path(&path, gen);
     let writer = BufWriterWithPos::new(
         OpenOptions::new()
@@ -230,7 +226,7 @@ fn new_log_file(
 fn sorted_gen_list(path: &Path) -> Result<Vec<u64>> {
     let mut gen_list: Vec<u64> = fs::read_dir(&path)?
         .flat_map(|res| -> Result<_> {
-            println!("{:?}",res);
+            println!("{:?}", res);
             Ok(res.unwrap().path())
         })
         .filter(|path| path.is_file() && path.extension() == Some("log".as_ref()))
@@ -249,7 +245,7 @@ fn sorted_gen_list(path: &Path) -> Result<Vec<u64>> {
 /// Load the whole log file and store value locations in the index map.
 ///
 /// Returns how many bytes can be saved after a compaction.
-fn load(gen: u64, reader: &mut BufReaderWithPos<File>, index: &mut BTreeMap<String, CommandPos>, ) -> Result<u64> {
+fn load(gen: u64, reader: &mut BufReaderWithPos<File>, index: &mut BTreeMap<String, CommandPos>) -> Result<u64> {
     // To make sure we read from the beginning of the file.
     let mut pos = reader.seek(SeekFrom::Start(0))?;
     let mut stream = Deserializer::from_reader(reader).into_iter::<Command>();
