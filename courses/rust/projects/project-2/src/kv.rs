@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, HashMap};
+use std::ffi::OsStr;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, BufReader, BufWriter, Read, Seek, SeekFrom, Write};
 use std::ops::Range;
@@ -8,7 +9,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Deserializer;
 
 use crate::{KvsError, Result};
-use std::ffi::OsStr;
 
 const COMPACTION_THRESHOLD: u64 = 1024 * 1024;
 
@@ -225,9 +225,14 @@ fn new_log_file(
 }
 
 /// Returns sorted generation numbers in the given directory.
+// map flat_map next
+
 fn sorted_gen_list(path: &Path) -> Result<Vec<u64>> {
     let mut gen_list: Vec<u64> = fs::read_dir(&path)?
-        .flat_map(|res| -> Result<_> { Ok(res?.path()) })
+        .flat_map(|res| -> Result<_> {
+            println!("{:?}",res);
+            Ok(res.unwrap().path())
+        })
         .filter(|path| path.is_file() && path.extension() == Some("log".as_ref()))
         .flat_map(|path| {
             path.file_name()
@@ -244,11 +249,7 @@ fn sorted_gen_list(path: &Path) -> Result<Vec<u64>> {
 /// Load the whole log file and store value locations in the index map.
 ///
 /// Returns how many bytes can be saved after a compaction.
-fn load(
-    gen: u64,
-    reader: &mut BufReaderWithPos<File>,
-    index: &mut BTreeMap<String, CommandPos>,
-) -> Result<u64> {
+fn load(gen: u64, reader: &mut BufReaderWithPos<File>, index: &mut BTreeMap<String, CommandPos>, ) -> Result<u64> {
     // To make sure we read from the beginning of the file.
     let mut pos = reader.seek(SeekFrom::Start(0))?;
     let mut stream = Deserializer::from_reader(reader).into_iter::<Command>();
