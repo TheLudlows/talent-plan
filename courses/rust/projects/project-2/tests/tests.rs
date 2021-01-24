@@ -9,7 +9,7 @@ use walkdir::WalkDir;
 // `kvs` with no args should exit with a non-zero code.
 #[test]
 fn cli_no_args() {
-    Command::cargo_bin("kvs").unwrap().assert().failure();
+    Clemmand::cargo_bin("kvs").unwrap().assert().failure();
 }
 
 // `kvs -V` should print the version

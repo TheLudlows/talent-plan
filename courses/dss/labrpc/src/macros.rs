@@ -4,8 +4,7 @@ macro_rules! service {
         compile_error!("empty service is not allowed");
     };
     (
-        $(#[$service_attr:meta])*
-        service $svc_name:ident {
+        $(#[$service_attr:meta])* service $svc_name:ident {
             $(
                 $(#[$method_attr:meta])*
                 rpc $method_name:ident($input:ty) returns ($output:ty);
